@@ -3,7 +3,10 @@ import axios from "axios";
 import { QueryForm } from "./components/QueryForm";
 import { ResultsTable } from "./components/ResultsTable";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
+// Prefer env var, but safely fall back to your Railway URL
+const API_BASE_URL =
+  (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
+  "https://web-production-62235.up.railway.app";
 
 interface QueryResponse {
   sql: string;
@@ -26,9 +29,10 @@ function App() {
     setRows([]);
 
     try {
-      const res = await axios.post<QueryResponse>(`${API_BASE_URL}/api/query`, {
-        question,
-      });
+      const res = await axios.post<QueryResponse>(
+        `${API_BASE_URL}/api/query`,
+        { question },
+      );
       setSql(res.data.sql);
       setColumns(res.data.columns);
       setRows(res.data.rows);
