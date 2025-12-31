@@ -26,7 +26,7 @@ function App() {
     setRows([]);
 
     try {
-      const res = await axios.post<QueryResponse>(`${API_BASE_URL}/api/query`, {
+      const res = await axios.post<QueryResponse>(`${API_BASE_URL}api/query`, {
         question,
       });
       setSql(res.data.sql);
