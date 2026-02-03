@@ -1,4 +1,5 @@
 import os
+import asyncio
 from app.core.config import settings
 
 # ---------- Gemini setup ----------
@@ -20,14 +21,14 @@ async def generate_sql(schema: str, question: str) -> str:
 
     prompt = BASE_PROMPT.format(schema=schema, question=question)
 
-    # 🟢 Prefer Gemini if available
+    # 🟢 Prefer Gemini if available (ASYNC SAFE)
     if gemini_model:
-        response = gemini_model.generate_content(
-            f"""
-You write safe, read-only SQL for PostgreSQL.
-
-{prompt}
-"""
+        loop = asyncio.get_running_loop()
+        response = await loop.run_in_executor(
+            None,
+            lambda: gemini_model.generate_content(
+                f"You write safe, read-only SQL for PostgreSQL.\n\n{prompt}"
+            )
         )
         return response.text.strip().strip("```sql").strip("```").strip()
 
