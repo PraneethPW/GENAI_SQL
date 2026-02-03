@@ -14,27 +14,20 @@ if GEMINI_API_KEY:
         import google.generativeai as genai
         genai.configure(api_key=GEMINI_API_KEY)
         
-        # 🔍 LIST ALL AVAILABLE MODELS FOR YOUR API KEY
-        print("🔍 Available models:")
-        for model in genai.list_models():
-            print(f"  - {model.name}")
+        # ✅ Use FIRST available Gemini model from your list (strip 'models/' prefix)
+        available_models = genai.list_models()
+        for model in available_models:
+            model_name = model.name.replace("models/", "")  # Remove 'models/' prefix
+            if "gemini" in model_name and "latest" not in model_name:  # Pick stable Gemini
+                try:
+                    gemini_model = genai.GenerativeModel(model_name)
+                    print(f"🚀 Using model: {model_name}")
+                    break
+                except:
+                    continue
         
-        # Try the OLDEST, most universal model names
-        working_models = []
-        for model_name in ["gemini-1.0-pro", "models/gemini-1.0-pro", "gemini-pro", "text-bison"]:
-            try:
-                test_model = genai.GenerativeModel(model_name)
-                working_models.append(model_name)
-                print(f"✅ WORKING: {model_name}")
-                gemini_model = test_model
-                break
-            except:
-                continue
-        
-        if gemini_model:
-            print(f"🚀 Using model: {working_models[0]}")
-        else:
-            print("❌ NO MODELS WORK - Check GEMINI_API_KEY permissions")
+        if not gemini_model:
+            print("❌ No suitable Gemini model found")
             
     except Exception as e:
         print(f"❌ Init failed: {e}")
