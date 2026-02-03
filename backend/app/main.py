@@ -16,13 +16,13 @@ app.add_middleware(
 
 app.include_router(query_router)
 
-
 @app.get("/health")
 def health():
     return {"status": "ok"}
-    
-@app.get("/debug-openai-key")
-def debug_openai_key():
-    from app.core.config import settings
-    key = settings.OPENAI_API_KEY or ""
-    return {"prefix": key[:15], "length": len(key)}
+
+# 🗑️ REMOVE THIS ENDPOINT - Security risk & OpenAI unused
+# @app.get("/debug-openai-key")
+# def debug_openai_key():
+#     from app.core.config import settings
+#     key = settings.OPENAI_API_KEY or ""
+#     return {"prefix": key[:15], "length": len(key)}

@@ -2,18 +2,18 @@ import os
 import asyncio
 from app.core.config import settings
 
-# ---------- Gemini setup (NEW UNIFIED SDK) ----------
+# ---------- Gemini setup (WORKING SDK) ----------
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 gemini_model = None
 
 if GEMINI_API_KEY:
     try:
-        import google.genai as genai  # New SDK: pip install google-genai
+        import google.generativeai as genai  # OLD but works: pip install google-generativeai
         genai.configure(api_key=GEMINI_API_KEY)
-        # Latest stable model (verify at https://ai.google.dev/gemini-api/docs/models/gemini)
-        gemini_model = genai.GenerativeModel("gemini-2.0-flash-exp")
+        # ✅ FIXED MODEL NAME - works with old SDK
+        gemini_model = genai.GenerativeModel("gemini-1.5-flash-001")
     except ImportError:
-        print("ERROR: Install google-genai: pip install google-genai")
+        print("ERROR: Install google-generativeai: pip install google-generativeai")
     except Exception as e:
         print(f"Gemini init failed: {e}")
 
