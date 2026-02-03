@@ -5,5 +5,4 @@ SQLAlchemy
 psycopg2-binary
 pydantic
 httpx
-openai>=1.0.0
-google-generativeai
+google-genai
