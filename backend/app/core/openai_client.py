@@ -1,14 +1,38 @@
-from openai import OpenAI
+import os
 from app.core.config import settings
 
-client = OpenAI(api_key=settings.OPENAI_API_KEY)
+# ---------- Gemini setup ----------
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+gemini_model = None
+
+if GEMINI_API_KEY:
+    import google.generativeai as genai
+    genai.configure(api_key=GEMINI_API_KEY)
+    gemini_model = genai.GenerativeModel("gemini-1.5-flash")
+
+# ---------- OpenAI setup ----------
+from openai import OpenAI
+openai_client = OpenAI(api_key=settings.OPENAI_API_KEY)
+
 
 async def generate_sql(schema: str, question: str) -> str:
     from app.prompts import BASE_PROMPT
 
     prompt = BASE_PROMPT.format(schema=schema, question=question)
 
-    resp =  client.chat.completions.create(
+    # 🟢 Prefer Gemini if available
+    if gemini_model:
+        response = gemini_model.generate_content(
+            f"""
+You write safe, read-only SQL for PostgreSQL.
+
+{prompt}
+"""
+        )
+        return response.text.strip().strip("```sql").strip("```").strip()
+
+    # 🔵 Fallback to OpenAI
+    resp = openai_client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": "You write safe, read-only SQL for PostgreSQL."},
@@ -16,5 +40,6 @@ async def generate_sql(schema: str, question: str) -> str:
         ],
         temperature=0.1,
     )
+
     sql = resp.choices[0].message.content or ""
     return sql.strip().strip("```sql").strip("```").strip()
